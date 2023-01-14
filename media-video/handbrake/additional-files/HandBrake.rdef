@@ -1,5 +1,5 @@
 
-resource app_signature "application/x-vnd.titer-handbrake";
+resource app_signature "application/x-vnd.fr-handbrake-ghb";
 
 resource file_types message;
 
@@ -8,7 +8,7 @@ resource app_version {
 	middle = @MIDDLE@,
 	minor  = @MINOR@,
 
-	variety = B_APPV_DEVELOPMENT,
+	variety = B_APPV_FINAL,
 	internal = 0,
 
 	short_info = "HandBrake",

@@ -1,3 +1,18 @@
+## Update 2023-01-14
+Thanks to Haiku's support for GTK in R1 Beta 4, it is now possible to build the
+1.5.1 version of HandBrake complete with GUI, with only minimal patches to get
+certain libraries to build. I have chosen to use the Linux GUI instead of the
+old native BeOS GUI, since it is much more up to date.
+
+#Todo:
+
+- Fix application icons
+- Remove unused desktop and metainfo files
+- Move executable to appsDir and rename to HandBrake
+- Upgrade to 1.6.x
+
+## Old notes
+
 HandBrake, the well-known DVD ripping and video transcoding tool, was initially
 developed for BeOS and had a fully featured BeOS GUI. However, support for
 Haiku is not as great as this suggests. BeOS support was dropped in early 2007
