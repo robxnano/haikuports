@@ -13,7 +13,7 @@ skills and the details of the game."
 HOMEPAGE="http://www.stuff-o-matic.com/plee-the-bear/"
 COPYRIGHT="2012 Stuff O Matic"
 LICENSE="GNU GPL v3"
-REVISION="2"
+REVISION="3"
 srcGitRev="8b08a7a49fa74d59dbfcbf0f2d77dcfee1642f7c"
 SOURCE_URI="https://github.com/j-jorge/plee-the-bear/archive/$portVersion.tar.gz"
 CHECKSUM_SHA256="1353f37d392966e58cb976ad031af4e4aecfd032d6994d22fb08af0a219417bc"
@@ -26,7 +26,7 @@ SOURCE_DIR_2="bear-$srcGitRev"
 PATCHES="plee_the_bear-$portVersion.patchset"
 PATCHES_2="bear-$portVersion.patchset"
 
-ARCHITECTURES="?all !x86_gcc2"
+ARCHITECTURES="all !x86_gcc2"
 SECONDARY_ARCHITECTURES="?x86"
 
 PROVIDES="
@@ -71,10 +71,10 @@ REQUIRES="
 
 BUILD_REQUIRES="
 	haiku${secondaryArchSuffix}_devel
-	devel:libboost_filesystem$secondaryArchSuffix
-	devel:libboost_regex$secondaryArchSuffix
-	devel:libboost_system$secondaryArchSuffix
-	devel:libboost_thread$secondaryArchSuffix
+	devel:libboost_filesystem$secondaryArchSuffix >= 1.70.0
+	devel:libboost_regex$secondaryArchSuffix >= 1.70.0
+	devel:libboost_system$secondaryArchSuffix >= 1.70.0
+	devel:libboost_thread$secondaryArchSuffix >= 1.70.0
 	devel:libclaw_application$secondaryArchSuffix
 	devel:libfreetype$secondaryArchSuffix
 	devel:libGL$secondaryArchSuffix
@@ -112,6 +112,7 @@ EOF
 
 	cmake .. -DCMAKE_BUILD_TYPE=Release \
 		-DBEAR_EDITORS_ENABLED=FALSE \
+		-DBUILD_SHARED_LIBS=ON \
 		-DCMAKE_INSTALL_PREFIX=$prefix \
 		-DCMAKE_CXX_FLAGS="-DNDEBUG"
 	make $jobArgs
