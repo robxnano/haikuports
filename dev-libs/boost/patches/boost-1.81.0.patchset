@@ -1,0 +1,145 @@
+From 172a909099b905fee46a60ef9a00ab9996ec6c0f Mon Sep 17 00:00:00 2001
+From: Adrien Destugues <pulkomandy@gmail.com>
+Date: Sat, 6 Aug 2016 22:27:41 +0200
+Subject: Import changes from 1.55.0: sourcecode
+
+
+diff --git a/boost/thread/detail/platform.hpp b/boost/thread/detail/platform.hpp
+index 172a601..c706e40 100644
+--- a/boost/thread/detail/platform.hpp
++++ b/boost/thread/detail/platform.hpp
+@@ -34,7 +34,7 @@
+ #if ! defined BOOST_THREAD_WIN32
+ #  define BOOST_THREAD_WIN32
+ #endif
+-#elif defined(__BEOS__)
++#elif defined(__BEOS__) || defined(__HAIKU__)
+ #  define BOOST_THREAD_BEOS
+ #elif defined(macintosh) || defined(__APPLE__) || defined(__APPLE_CC__)
+ #  define BOOST_THREAD_MACOS
+-- 
+2.37.3
+
+
+From 7a66a0e6901e0fb5b1b10c0fba6c28a6b5643e2f Mon Sep 17 00:00:00 2001
+From: Alexander von Gluck IV <kallisti5@unixzen.com>
+Date: Wed, 3 Feb 2021 08:36:01 -0600
+Subject: boost/beast: Fix macro seeing , as args on gcc8
+
+
+diff --git a/boost/beast/core/impl/buffers_prefix.hpp b/boost/beast/core/impl/buffers_prefix.hpp
+index e4a484b..139dfb2 100644
+--- a/boost/beast/core/impl/buffers_prefix.hpp
++++ b/boost/beast/core/impl/buffers_prefix.hpp
+@@ -43,9 +43,9 @@ public:
+     using value_type = buffers_type<Buffers>;
+ #endif
+ 
+-    BOOST_STATIC_ASSERT(std::is_same<
++    BOOST_STATIC_ASSERT((std::is_same<
+         typename const_iterator::value_type,
+-        typename buffers_prefix_view::value_type>::value);
++        typename buffers_prefix_view::value_type>::value));
+ 
+     using pointer = value_type const*;
+     using reference = value_type;
+-- 
+2.37.3
+
+
+From 6e1b2ce2272d11cca5f7b279dec5cbd46b32f6b8 Mon Sep 17 00:00:00 2001
+From: PulkoMandy <pulkomandy@pulkomandy.tk>
+Date: Fri, 13 Jan 2023 21:26:43 +0100
+Subject: Haiku currently doesn't have cfsetspeed
+
+
+diff --git a/boost/asio/impl/serial_port_base.ipp b/boost/asio/impl/serial_port_base.ipp
+index c7ff518..5174970 100644
+--- a/boost/asio/impl/serial_port_base.ipp
++++ b/boost/asio/impl/serial_port_base.ipp
+@@ -114,7 +114,8 @@ BOOST_ASIO_SYNC_OP_VOID serial_port_base::baud_rate::store(
+     ec = boost::asio::error::invalid_argument;
+     BOOST_ASIO_SYNC_OP_VOID_RETURN(ec);
+   }
+-# if defined(_BSD_SOURCE) || defined(_DEFAULT_SOURCE)
++# if (defined(_BSD_SOURCE) || defined(_DEFAULT_SOURCE)) && !defined(__HAIKU__)
++  // TODO re-enable this for Haiku once cfsetspeed is implemented (#18220)
+   ::cfsetspeed(&storage, baud);
+ # else
+   ::cfsetispeed(&storage, baud);
+-- 
+2.37.3
+
+From e0fe7561026b49bb0db06f120ff1f64b43c6c3a2 Mon Sep 17 00:00:00 2001
+From: robxnano <89391914+robxnano@users.noreply.github.com>
+Date: Thu, 23 Feb 2023 20:30:12 +0000
+Subject: [PATCH] Don't disable C++11 features on modern GCC
+
+---
+ boost/config/platform/haiku.hpp | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
+
+diff --git a/boost/config/platform/haiku.hpp b/boost/config/platform/haiku.hpp
+index 04244c567..71a9aeedd 100644
+--- a/boost/config/platform/haiku.hpp
++++ b/boost/config/platform/haiku.hpp
+@@ -16,10 +16,12 @@
+ #  define BOOST_HAS_THREADS
+ #endif
+ 
+-#define BOOST_NO_CXX11_HDR_TYPE_TRAITS
+-#define BOOST_NO_CXX11_ATOMIC_SMART_PTR
+-#define BOOST_NO_CXX11_STATIC_ASSERT
+-#define BOOST_NO_CXX11_VARIADIC_MACROS
++#if (__GNUC__ < 3)
++#  define BOOST_NO_CXX11_HDR_TYPE_TRAITS
++#  define BOOST_NO_CXX11_ATOMIC_SMART_PTR
++#  define BOOST_NO_CXX11_STATIC_ASSERT
++#  define BOOST_NO_CXX11_VARIADIC_MACROS
++#endif
+ 
+ //
+ // thread API's not auto detected:
+-- 
+2.37.3
+
+
+From fbbe11fda2b3fa785ae7d404ae15adf7ffaed330 Mon Sep 17 00:00:00 2001
+From: robxnano <89391914+robxnano@users.noreply.github.com>
+Date: Tue, 7 Mar 2023 00:39:52 +0000
+Subject: [PATCH] Enable BSD functions
+
+---
+ tools/build/src/engine/build.sh | 4 ++--
+ tools/build/src/engine/jam.h    | 1 +
+ 2 files changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/tools/build/src/engine/build.sh b/tools/build/src/engine/build.sh
+index 0fe8122..6cbed35 100755
+--- a/tools/build/src/engine/build.sh
++++ b/tools/build/src/engine/build.sh
+@@ -323,8 +323,8 @@ case "${B2_TOOLSET}" in
+ 
+     gcc|gcc-*)
+         CXX_VERSION_OPT=${CXX_VERSION_OPT:---version}
+-        B2_CXXFLAGS_RELEASE="-O2 -s"
+-        B2_CXXFLAGS_DEBUG="-O0 -g"
++        B2_CXXFLAGS_RELEASE="-O2 -s -lbsd"
++        B2_CXXFLAGS_DEBUG="-O0 -g -lbsd"
+     ;;
+ 
+     intel-*)
+diff --git a/tools/build/src/engine/jam.h b/tools/build/src/engine/jam.h
+index b6f2918..66b0c44 100644
+--- a/tools/build/src/engine/jam.h
++++ b/tools/build/src/engine/jam.h
+@@ -200,6 +200,7 @@
+     #define unix
+     #define OSMINOR "OS=HAIKU"
+     #define OS_HAIKU
++    #define _BSD_SOURCE
+ #endif
+ #ifdef __OPENNT
+     #define unix
+-- 
+2.37.3
