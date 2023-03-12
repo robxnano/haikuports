@@ -52,3 +52,152 @@ index c1a6d0f..781cc6f 100644
 -- 
 2.21.0
 
+
+From 297b4abe9301c151eefd59a33aa697b3d0d59fb9 Mon Sep 17 00:00:00 2001
+From: robxnano <89391914+robxnano@users.noreply.github.com>
+Date: Tue, 7 Mar 2023 21:32:00 +0000
+Subject: [PATCH] Use XDG_CONFIG_HOME properly
+
+---
+ src/main.cpp   |  2 +-
+ src/mudlet.cpp | 37 +++++++++++++++++++------------------
+ 2 files changed, 20 insertions(+), 19 deletions(-)
+
+diff --git a/src/main.cpp b/src/main.cpp
+index 30a41bb..595201c 100644
+--- a/src/main.cpp
++++ b/src/main.cpp
+@@ -493,7 +493,7 @@ int main(int argc, char* argv[])
+             QFile::link(homeDirectory, homeLinkWindows);
+         }
+     }
+-#else
++#elif !defined(Q_OS_HAIKU)
+     QFile linkFile(homeLink);
+     if (!linkFile.exists() && first_launch) {
+         QFile::link(homeDirectory, homeLink);
+diff --git a/src/mudlet.cpp b/src/mudlet.cpp
+index fb1cce8..fefb0a3 100644
+--- a/src/mudlet.cpp
++++ b/src/mudlet.cpp
+@@ -65,6 +65,7 @@
+ #include <QTextStream>
+ #include <QToolBar>
+ #include <QVariantHash>
++#include <QStandardPaths>
+ 
+ #include <zip.h>
+ #include "post_guard.h"
+@@ -4333,71 +4334,71 @@ QString mudlet::getMudletPath(const mudletPathType mode, const QString& extra1,
+     switch (mode) {
+     case mainPath:
+         // The root of all mudlet data for the user - does not end in a '/'
+-        return QStringLiteral("%1/.config/mudlet").arg(QDir::homePath());
++        return QStringLiteral("%1/mudlet").arg(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation));
+     case mainDataItemPath:
+         // Takes one extra argument as a file (or directory) relating to
+         // (profile independent) mudlet data - may end with a '/' if the extra
+         // argument does:
+-        return QStringLiteral("%1/.config/mudlet/%2").arg(QDir::homePath(), extra1);
++        return QStringLiteral("%1/mudlet/%2").arg(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation), extra1);
+     case mainFontsPath:
+         // (Added for 3.5.0) a revised location to store Mudlet provided fonts
+-        return QStringLiteral("%1/.config/mudlet/fonts").arg(QDir::homePath());
++        return QStringLiteral("%1/mudlet/fonts").arg(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation));
+     case profilesPath:
+         // The directory containing all the saved user's profiles - does not end
+         // in '/'
+-        return QStringLiteral("%1/.config/mudlet/profiles").arg(QDir::homePath());
++        return QStringLiteral("%1/mudlet/profiles").arg(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation));
+     case profileHomePath:
+         // Takes one extra argument (profile name) that returns the base
+         // directory for that profile - does NOT end in a '/' unless the
+         // supplied profle name does:
+-        return QStringLiteral("%1/.config/mudlet/profiles/%2").arg(QDir::homePath(), extra1);
++        return QStringLiteral("%1/mudlet/profiles/%2").arg(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation), extra1);
+     case profileXmlFilesPath:
+         // Takes one extra argument (profile name) that returns the directory
+         // for the profile game save XML files - ends in a '/'
+-        return QStringLiteral("%1/.config/mudlet/profiles/%2/current/").arg(QDir::homePath(), extra1);
++        return QStringLiteral("%1/mudlet/profiles/%2/current/").arg(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation), extra1);
+     case profileMapsPath:
+         // Takes one extra argument (profile name) that returns the directory
+         // for the profile game save maps files - does NOT end in a '/'
+-        return QStringLiteral("%1/.config/mudlet/profiles/%2/map").arg(QDir::homePath(), extra1);
++        return QStringLiteral("%1/mudlet/profiles/%2/map").arg(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation), extra1);
+     case profileDateTimeStampedMapPathFileName:
+         // Takes two extra arguments (profile name, dataTime stamp) that returns
+         // the pathFile name for a dateTime stamped map file:
+-        return QStringLiteral("%1/.config/mudlet/profiles/%2/map/%3map.dat").arg(QDir::homePath(), extra1, extra2);
++        return QStringLiteral("%1/mudlet/profiles/%2/map/%3map.dat").arg(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation), extra1, extra2);
+     case profileMapPathFileName:
+         // Takes two extra arguments (profile name, mapFileName) that returns
+         // the pathFile name for any map file:
+-        return QStringLiteral("%1/.config/mudlet/profiles/%2/map/%3").arg(QDir::homePath(), extra1, extra2);
++        return QStringLiteral("%1/mudlet/profiles/%2/map/%3").arg(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation), extra1, extra2);
+     case profileXmlMapPathFileName:
+         // Takes one extra argument (profile name) that returns the pathFile
+         // name for the downloaded IRE Server provided XML map:
+-        return QStringLiteral("%1/.config/mudlet/profiles/%2/map.xml").arg(QDir::homePath(), extra1);
++        return QStringLiteral("%1/mudlet/profiles/%2/map.xml").arg(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation), extra1);
+     case profileDataItemPath:
+         // Takes two extra arguments (profile name, data item) that gives a
+         // path file name for, typically a data item stored as a single item
+         // (binary) profile data) file (ideally these can be moved to a per
+         // profile QSettings file but that is a future pipe-dream on my part
+         // SlySven):
+-        return QStringLiteral("%1/.config/mudlet/profiles/%2/%3").arg(QDir::homePath(), extra1, extra2);
++        return QStringLiteral("%1/mudlet/profiles/%2/%3").arg(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation), extra1, extra2);
+     case profilePackagePath:
+         // Takes two extra arguments (profile name, package name) returns the
+         // per profile directory used to store (unpacked) package contents
+         // - ends with a '/':
+-        return QStringLiteral("%1/.config/mudlet/profiles/%2/%3/").arg(QDir::homePath(), extra1, extra2);
++        return QStringLiteral("%1/mudlet/profiles/%2/%3/").arg(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation), extra1, extra2);
+     case profilePackagePathFileName:
+         // Takes two extra arguments (profile name, package name) returns the
+         // filename of the XML file that contains the (per profile, unpacked)
+         // package mudlet items in that package/module:
+-        return QStringLiteral("%1/.config/mudlet/profiles/%2/%3/%3.xml").arg(QDir::homePath(), extra1, extra2);
++        return QStringLiteral("%1/mudlet/profiles/%2/%3/%3.xml").arg(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation), extra1, extra2);
+     case profileReplayAndLogFilesPath:
+         // Takes one extra argument (profile name) that returns the directory
+         // that contains replays (*.dat files) and logs (*.html or *.txt) files
+         // for that profile - does NOT end in '/':
+-        return QStringLiteral("%1/.config/mudlet/profiles/%2/log").arg(QDir::homePath(), extra1);
++        return QStringLiteral("%1/mudlet/profiles/%2/log").arg(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation), extra1);
+     case profileLogErrorsFilePath:
+         // Takes one extra argument (profile name) that returns the pathFileName
+         // to the map auditing report file that is appended to each time a
+         // map is loaded:
+-        return QStringLiteral("%1/.config/mudlet/profiles/%2/log/errors.txt").arg(QDir::homePath(), extra1);
++        return QStringLiteral("%1/mudlet/profiles/%2/log/errors.txt").arg(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation), extra1);
+     case editorWidgetThemePathFile:
+         // Takes two extra arguments (profile name, theme name) that returns the
+         // pathFileName of the theme file used by the edbee editor - also
+@@ -4405,7 +4406,7 @@ QString mudlet::getMudletPath(const mudletPathType mode, const QString& extra1,
+         // is carried internally in the resource file:
+         if (extra1.compare(QStringLiteral("Mudlet.tmTheme"), Qt::CaseSensitive)) {
+             // No match
+-            return QStringLiteral("%1/.config/mudlet/edbee/Colorsublime-Themes-master/themes/%2").arg(QDir::homePath(), extra1);
++            return QStringLiteral("%1/mudlet/edbee/Colorsublime-Themes-master/themes/%2").arg(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation), extra1);
+         } else {
+             // Match - return path to copy held in resource file
+             return QStringLiteral(":/edbee_defaults/Mudlet.tmTheme");
+@@ -4413,11 +4414,11 @@ QString mudlet::getMudletPath(const mudletPathType mode, const QString& extra1,
+     case editorWidgetThemeJsonFile:
+         // Returns the pathFileName to the external JSON file needed to process
+         // an edbee editor widget theme:
+-        return QStringLiteral("%1/.config/mudlet/edbee/Colorsublime-Themes-master/themes.json").arg(QDir::homePath());
++        return QStringLiteral("%1/mudlet/edbee/Colorsublime-Themes-master/themes.json").arg(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation));
+     case moduleBackupsPath:
+         // Returns the directory used to store module backups that is used in
+         // when saving/resyncing packages/modules - ends in a '/'
+-        return QStringLiteral("%1/.config/mudlet/moduleBackups/").arg(QDir::homePath());
++        return QStringLiteral("%1/mudlet/moduleBackups/").arg(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation));
+     case qtTranslationsPath:
+         return QLibraryInfo::location(QLibraryInfo::TranslationsPath);
+     case hunspellDictionaryPath:
+-- 
+2.37.3
+
