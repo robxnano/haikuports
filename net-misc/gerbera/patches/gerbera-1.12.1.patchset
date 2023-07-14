@@ -93,3 +93,55 @@ index bc5ab1f..ccd0a90 100644
 -- 
 2.37.3
 
+From 9dbd2260d61203e60daaa2a7998e951c1f6a8cd8 Mon Sep 17 00:00:00 2001
+From: robxnano <89391914+robxnano@users.noreply.github.com>
+Date: Sat, 15 Jul 2023 18:49:15 +0000
+Subject: [PATCH] Remove non-standard integer types
+
+---
+ src/metadata/matroska_handler.cc | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/src/metadata/matroska_handler.cc b/src/metadata/matroska_handler.cc
+index d85917d..5b44145 100644
+--- a/src/metadata/matroska_handler.cc
++++ b/src/metadata/matroska_handler.cc
+@@ -59,7 +59,7 @@ public:
+         mediaFile = file.open("rb");
+     }
+ 
+-    uint32 read(void* buffer, std::size_t size) override
++    std::uint32_t read(void* buffer, std::size_t size) override
+     {
+         assert(mediaFile);
+         if (size == 0)
+@@ -67,7 +67,7 @@ public:
+         return std::fread(buffer, 1, size, mediaFile);
+     }
+ 
+-    void setFilePointer(int64_t offset, seek_mode mode = seek_beginning) override
++    void setFilePointer(std::int64_t offset, seek_mode mode = seek_beginning) override
+     {
+         assert(mediaFile);
+         assert(mode == SEEK_CUR || mode == SEEK_END || mode == SEEK_SET);
+@@ -82,7 +82,7 @@ public:
+         return 0;
+     }
+ 
+-    uint64 getFilePointer() override
++    std::uint64_t getFilePointer() override
+     {
+         assert(mediaFile);
+         return ftello(mediaFile);
+@@ -217,7 +217,7 @@ void MatroskaHandler::parseHead(const std::shared_ptr<CdsItem>& item, IOCallback
+             if (!seekId || !seekPos)
+                 continue;
+             auto seekIdValue = EbmlId(seekId->GetBuffer(), seekId->GetSize());
+-            auto segmentPosition = ebmlHead->GetElementPosition() + ebmlHead->HeadSize() + uint16(*seekPos);
++            auto segmentPosition = ebmlHead->GetElementPosition() + ebmlHead->HeadSize() + std::uint16_t(*seekPos);
+             log_debug("parseHead: Seek ID {} at {}", seekIdValue.GetValue(), segmentPosition);
+             if (seekIdValue == LIBMATROSKA_NAMESPACE::KaxAttachments::ClassInfos.GlobalId || seekIdValue == LIBMATROSKA_NAMESPACE::KaxInfo::ClassInfos.GlobalId) {
+                 ebmlFile.setFilePointer(segmentPosition);
+-- 
+2.37.3
+
