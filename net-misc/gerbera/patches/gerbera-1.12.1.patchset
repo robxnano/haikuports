@@ -93,3 +93,29 @@ index bc5ab1f..ccd0a90 100644
 -- 
 2.37.3
 
+From 86d4ad66071258257803097f72b948eb1baccfab Mon Sep 17 00:00:00 2001
+From: robxnano <89391914+robxnano@users.noreply.github.com>
+Date: Fri, 14 Jul 2023 17:07:59 +0000
+Subject: [PATCH] Use std uint32_t as return type of read
+
+Needed for compatibility with patched libebml.
+---
+ src/metadata/matroska_handler.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/metadata/matroska_handler.cc b/src/metadata/matroska_handler.cc
+index d85917d..ade04b7 100644
+--- a/src/metadata/matroska_handler.cc
++++ b/src/metadata/matroska_handler.cc
+@@ -59,7 +59,7 @@ public:
+         mediaFile = file.open("rb");
+     }
+ 
+-    uint32 read(void* buffer, std::size_t size) override
++    std::uint32_t read(void* buffer, std::size_t size) override
+     {
+         assert(mediaFile);
+         if (size == 0)
+-- 
+2.37.3
+
